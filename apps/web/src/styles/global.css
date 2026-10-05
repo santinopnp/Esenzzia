@@ -5,23 +5,54 @@
 @layer base {
   body {
     @apply bg-cream font-sans text-dark antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3 {
     @apply font-serif;
+  }
+  * {
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gold text-white font-semibold px-6 py-3 rounded-sm hover:bg-gold-dark transition-colors duration-200 disabled:opacity-50;
+    @apply bg-gold text-white font-semibold px-6 py-3 rounded-sm hover:bg-gold-dark active:bg-gold-dark transition-colors duration-200 disabled:opacity-50;
   }
   .btn-outline {
-    @apply border border-gold text-gold font-semibold px-6 py-3 rounded-sm hover:bg-gold hover:text-white transition-colors duration-200;
+    @apply border border-gold text-gold font-semibold px-6 py-3 rounded-sm hover:bg-gold hover:text-white active:bg-gold active:text-white transition-colors duration-200;
   }
   .card {
     @apply bg-white rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200;
   }
   .input {
     @apply w-full border border-gray-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-gold transition-colors;
+  }
+}
+
+@layer utilities {
+  /* Safe-area padding for bottom nav on iOS */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Hide scrollbar while allowing scroll */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Line clamp */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

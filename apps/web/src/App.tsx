@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import BottomNav from './components/BottomNav';
 import ChatWidget from './components/ChatWidget';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
@@ -28,7 +29,7 @@ export default function App() {
       <CartProvider>
         <div className="min-h-screen flex flex-col">
           <Header />
-          <main className="flex-1">
+          <main className="flex-1 pb-16 md:pb-0">
             <Suspense fallback={<Loader />}>
               <Routes>
                 <Route path="/"            element={<LandingPage />} />
@@ -43,7 +44,10 @@ export default function App() {
               </Routes>
             </Suspense>
           </main>
-          <Footer />
+          <div className="hidden md:block">
+            <Footer />
+          </div>
+          <BottomNav />
           <ChatWidget />
         </div>
       </CartProvider>
