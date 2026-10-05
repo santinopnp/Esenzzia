@@ -1,42 +1,98 @@
-const router = require('express').Router();
-const { listProducts, getProduct, listCategories, getFeaturedProducts, searchProducts } = require('../services/productService');
+const express = require('express');
+const router = express.Router();
+const productService = require('../../services/productService');
+const { requireAuth, optionalAuth } = require('../middleware/auth');
+const { query } = require('../../config/postgres');
+const Joi = require('joi');
 
-router.get('/', async (req, res, next) => {
+router.get('/', async (req, res) => {
   try {
-    const { category, search, page, limit, sort, featured } = req.query;
-    const result = await listProducts({
-      categorySlug: category,
-      search,
-      page:  parseInt(page  || '1'),
-      limit: parseInt(limit || '24'),
-      sort,
-      featured: featured === 'true',
-    });
+    const { page = 1, limit = 20, category, sort, search } = req.query;
+    const result = await productService.listProducts({ page: +page, limit: +limit, category, sort, search });
     res.json(result);
-  } catch (err) { next(err); }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/categories', async (_req, res, next) => {
-  try { res.json(await listCategories()); } catch (err) { next(err); }
-});
-
-router.get('/featured', async (req, res, next) => {
-  try { res.json(await getFeaturedProducts(parseInt(req.query.limit || '8'))); } catch (err) { next(err); }
-});
-
-router.get('/search', async (req, res, next) => {
+router.get('/featured', async (req, res) => {
   try {
-    if (!req.query.q) return res.json([]);
-    res.json(await searchProducts(req.query.q, parseInt(req.query.limit || '10')));
-  } catch (err) { next(err); }
+    const products = await productService.getFeaturedProducts();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/:slug', async (req, res, next) => {
+router.get('/search', async (req, res) => {
   try {
-    const product = await getProduct(req.params.slug);
+    const { q, limit = 10 } = req.query;
+    if (!q) return res.json([]);
+    const results = await productService.searchProducts(q, +limit);
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/:slugOrId', async (req, res) => {
+  try {
+    const product = await productService.getProduct(req.params.slugOrId);
     if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
     res.json(product);
-  } catch (err) { next(err); }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST review
+router.post('/:id/reviews', requireAuth, async (req, res) => {
+  const schema = Joi.object({
+    rating: Joi.number().integer().min(1).max(5).required(),
+    title: Joi.string().max(100).optional().allow(''),
+    body: Joi.string().max(1000).optional().allow(''),
+  });
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    // Check if user already reviewed
+    const existing = await query(
+      'SELECT id FROM reviews WHERE product_id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    );
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'Ya has reseñado este producto' });
+    }
+    const result = await query(
+      `INSERT INTO reviews (product_id, user_id, rating, title, body)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [req.params.id, req.user.id, value.rating, value.title || null, value.body || null]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Validate coupon (used by checkout)
+router.post('/validate-coupon', optionalAuth, async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'Código requerido' });
+    const result = await query(
+      `SELECT * FROM coupons
+       WHERE code = $1 AND is_active = true
+         AND (expires_at IS NULL OR expires_at > NOW())
+         AND (usage_limit IS NULL OR usage_count < usage_limit)`,
+      [code.toUpperCase()]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Cupón inválido o expirado' });
+    const coupon = result.rows[0];
+    res.json({ valid: true, discount_percent: coupon.discount_percent, code: coupon.code });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
