@@ -2,23 +2,23 @@
   base      = "apps/web"
   command   = "npm run build"
   publish   = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Valentina chat — serverless function
+[[redirects]]
+  from   = "/api/chat/message"
+  to     = "/.netlify/functions/chat-message"
+  status = 200
+  force  = true
 
 # SPA routing: serve index.html for all client-side routes
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
   status = 200
-
-# Proxy /api calls to the backend (set VITE_API_URL in Netlify env vars for production)
-# Uncomment and set BACKEND_URL once backend is deployed:
-# [[redirects]]
-#   from   = "/api/*"
-#   to     = ":BACKEND_URL/api/:splat"
-#   status = 200
-#   force  = true
 
 [context.production.environment]
   VITE_API_URL = "https://api.esenzzia.com/api"

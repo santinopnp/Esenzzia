@@ -63,7 +63,7 @@ export default function ChatWidget() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 bg-gold text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-gold-dark transition-colors"
+        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 bg-gold text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-gold-dark transition-colors"
         aria-label="Chat con Valentina"
       >
         {open ? (
@@ -80,7 +80,7 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden" style={{ maxHeight: '70vh' }}>
+        <div className="fixed bottom-36 right-4 md:bottom-24 md:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden" style={{ maxHeight: '65vh' }}>
           {/* Header */}
           <div className="bg-dark px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-white font-serif font-bold text-sm">V</div>
