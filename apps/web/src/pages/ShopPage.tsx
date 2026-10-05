@@ -4,8 +4,8 @@ import ProductCard from '../components/ProductCard';
 
 export default function ShopPage() {
   const [params, setParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Array<{ slug: string; name: string }>>([]);
   const [total, setTotal]   = useState(0);
   const [page, setPage]     = useState(1);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function ShopPage() {
                 }`}
               >Todos</button>
             </li>
-            {categories.map((c: any) => (
+            {categories.map((c) => (
               <li key={c.slug}>
                 <button
                   onClick={() => { setParams({ category: c.slug }); setPage(1); }}
@@ -79,7 +79,7 @@ export default function ShopPage() {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-6">
             <h1 className="font-serif text-2xl font-bold">
-              {category ? categories.find((c: any) => c.slug === category)?.name || 'Catalogo' : 'Catalogo'}
+              {category ? categories.find((c) => c.slug === category)?.name || 'Catalogo' : 'Catalogo'}
             </h1>
             <p className="text-sm text-gray-500">{total} productos</p>
           </div>
@@ -98,7 +98,23 @@ export default function ShopPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {products.map((p: any) => <ProductCard key={p.id} product={p} />)}
+              {products.map((p: any) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+              {products.length === 0 && (
+                <div className="col-span-3 text-center py-16 text-gray-400">
+                  No se encontraron productos.
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {total > 24 && (
+            <div className="flex justify-center gap-2 mt-10">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded border disabled:opacity-40">← Anterior</button>
+              <span className="px-4 py-2 text-sm text-gray-500">Pág. {page} de {Math.ceil(total / 24)}</span>
+              <button onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(total / 24)} className="px-4 py-2 rounded border disabled:opacity-40">Siguiente →</button>
             </div>
           )}
         </div>
