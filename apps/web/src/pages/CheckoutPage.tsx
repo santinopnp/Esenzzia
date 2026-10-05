@@ -5,15 +5,6 @@ import { useAuth } from '../context/AuthContext';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-interface CartItem {
-  variantId: string;
-  productName: string;
-  brand: string;
-  size_ml: number;
-  price: number;
-  quantity: number;
-  image?: string;
-}
 
 interface AddressForm {
   full_name: string;
@@ -31,14 +22,20 @@ const SHIPPING_COST = 8000;
 
 const STEPS = ['Carrito', 'Dirección', 'Pago', 'Confirmación'];
 
+const CART_SESSION_KEY = 'esz_cart_session';
+function getCartSession() {
+  let s = localStorage.getItem(CART_SESSION_KEY);
+  if (!s) { s = crypto.randomUUID(); localStorage.setItem(CART_SESSION_KEY, s); }
+  return s;
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartSession, clearCart } = useCart();
+  const { cart, refresh: refreshCart } = useCart();
   const { token } = useAuth();
 
   const [step, setStep] = useState(1);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loadingCart, setLoadingCart] = useState(true);
+  const [loadingCart, setLoadingCart] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMsg, setCouponMsg] = useState('');
@@ -65,18 +62,8 @@ export default function CheckoutPage() {
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
 
-  useEffect(() => {
-    if (!cartSession) { setLoadingCart(false); return; }
-    fetch(`${API}/cart`, {
-      headers: { 'x-cart-session': cartSession, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    })
-      .then((r) => r.json())
-      .then((data) => setCartItems(data.items || []))
-      .catch(() => {})
-      .finally(() => setLoadingCart(false));
-  }, [cartSession, token]);
-
-  const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const cartItems = cart.items;
+  const subtotal = cart.subtotal;
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_COST;
   const discountAmount = Math.round((subtotal * couponDiscount) / 100);
   const total = subtotal - discountAmount + shipping;
@@ -120,7 +107,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-cart-session': cartSession || '',
+          'x-cart-session': getCartSession(),
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
@@ -164,7 +151,8 @@ export default function CheckoutPage() {
       }
 
       setOrderResult({ orderId: orderData.id, orderNumber: orderData.order_number });
-      clearCart();
+      localStorage.removeItem(CART_SESSION_KEY);
+      refreshCart();
       setStep(3);
     } catch (err: unknown) {
       setErrorMsg((err as Error).message || 'Ocurrió un error');
@@ -173,7 +161,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (loadingCart) {
+  if (loadingCart || !cart) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-gold" />
@@ -216,13 +204,13 @@ export default function CheckoutPage() {
                         <div key={item.variantId} className="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
                           <div className="w-16 h-16 bg-dark rounded-lg flex-shrink-0 overflow-hidden">
                             {item.image
-                              ? <img src={item.image} alt={item.productName} className="w-full h-full object-cover" />
-                              : <div className="w-full h-full flex items-center justify-center text-gold text-xs font-bold text-center p-1 leading-tight">{item.brand}</div>
+                              ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center text-gold text-xs font-bold text-center p-1 leading-tight">{item.name.slice(0, 6)}</div>
                             }
                           </div>
                           <div className="flex-1">
-                            <p className="font-semibold text-dark text-sm">{item.productName}</p>
-                            <p className="text-gold text-xs">{item.brand} · {item.size_ml}ml</p>
+                            <p className="font-semibold text-dark text-sm">{item.name}</p>
+                            <p className="text-gold text-xs">{item.slug}</p>
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-dark">${(item.price * item.quantity).toLocaleString('es-CO')}</p>
@@ -410,13 +398,13 @@ export default function CheckoutPage() {
                     <div key={item.variantId} className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-dark rounded-lg flex-shrink-0 overflow-hidden">
                         {item.image
-                          ? <img src={item.image} alt={item.productName} className="w-full h-full object-cover" />
-                          : <div className="w-full h-full flex items-center justify-center text-gold text-xs font-bold text-center p-0.5 leading-tight">{item.brand.slice(0,3)}</div>
+                          ? <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full flex items-center justify-center text-gold text-xs font-bold text-center p-0.5 leading-tight">{item.name.slice(0,3)}</div>
                         }
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-dark truncate">{item.productName}</p>
-                        <p className="text-xs text-gray-400">{item.size_ml}ml · x{item.quantity}</p>
+                        <p className="text-xs font-semibold text-dark truncate">{item.name}</p>
+                        <p className="text-xs text-gray-400">{}{item.quantity}</p>
                       </div>
                       <p className="text-xs font-bold text-dark flex-shrink-0">${(item.price * item.quantity).toLocaleString('es-CO')}</p>
                     </div>

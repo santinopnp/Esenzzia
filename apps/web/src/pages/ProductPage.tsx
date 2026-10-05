@@ -57,7 +57,7 @@ const StarRating = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { token } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -96,7 +96,7 @@ export default function ProductPage() {
     if (!selectedVariant) return;
     setAdding(true);
     try {
-      await addToCart(selectedVariant.id, qty);
+      await addItem('', selectedVariant.id, qty);
       setAddedMsg('¡Agregado al carrito!');
       setTimeout(() => setAddedMsg(''), 3000);
     } catch {
