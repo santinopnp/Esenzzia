@@ -1,0 +1,14 @@
+{
+  "name": "esenzzia",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@esenzzia/backend",
+    "start": "npm run start --workspace=@esenzzia/backend",
+    "build": "npm run build --workspace=@esenzzia/web",
+    "test": "npm run test --workspace=@esenzzia/backend"
+  }
+}

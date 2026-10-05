@@ -1,0 +1,49 @@
+{
+  "name": "@esenzzia/backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Esenzzia Express.js backend — e-commerce + AI + Zoho",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build": "echo 'Build successful'",
+    "test": "jest --passWithNoTests",
+    "migrate": "node scripts/migrate.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.54.0",
+    "@aws-sdk/client-s3": "^3.1090.0",
+    "@aws-sdk/s3-request-presigner": "^3.1038.0",
+    "axios": "^1.17.0",
+    "bcryptjs": "^3.0.3",
+    "bullmq": "^5.81.3",
+    "compression": "^1.8.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-session": "^1.18.2",
+    "form-data": "^4.0.0",
+    "helmet": "^8.3.0",
+    "ioredis": "^5.11.1",
+    "joi": "^17.13.4",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.11.0",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.0.12",
+    "pg": "^8.23.1",
+    "sanitize-html": "^2.17.7",
+    "sharp": "^0.35.5",
+    "stripe": "^18.0.0",
+    "uuid": "^14.0.1",
+    "validator": "^13.15.21",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}
