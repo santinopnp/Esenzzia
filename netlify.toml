@@ -1,0 +1,27 @@
+[build]
+  base      = "apps/web"
+  command   = "npm run build"
+  publish   = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA routing: serve index.html for all client-side routes
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Proxy /api calls to the backend (set VITE_API_URL in Netlify env vars for production)
+# Uncomment and set BACKEND_URL once backend is deployed:
+# [[redirects]]
+#   from   = "/api/*"
+#   to     = ":BACKEND_URL/api/:splat"
+#   status = 200
+#   force  = true
+
+[context.production.environment]
+  VITE_API_URL = "https://api.esenzzia.com/api"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://api-staging.esenzzia.com/api"
