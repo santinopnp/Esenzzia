@@ -18,7 +18,7 @@ Tono: cálido, experto en fragancias, elegante sin ser pretencioso.
 Usa vocabulario del mundo perfumero (notas de salida/corazón/fondo, sillage, longevidad, etc.)
 Comunica siempre en español colombiano. Respuestas concisas: máximo 3-4 oraciones salvo que se pida detalle.`;
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
