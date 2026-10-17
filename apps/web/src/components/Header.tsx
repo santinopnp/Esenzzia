@@ -1,61 +1,80 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import Logo from './brand/Logo';
+
+const NAV = [
+  { label: 'Perfumes', to: '/shop' },
+  { label: 'Destacados', to: '/shop?featured=true' },
+  { label: 'Árabes', to: '/shop?category=arabicos' },
+  { label: 'Nicho', to: '/shop?category=nicho' },
+];
 
 export default function Header() {
   const { cart } = useCart();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
+  const { pathname, search } = useLocation();
+  const current = pathname + search;
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
-
   const itemCount = cart.items.reduce((s, i) => s + i.quantity, 0);
+  const navLink = 'text-ink-soft hover:text-ink hover:underline decoration-accent-decor underline-offset-8';
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white shadow-sm' : 'bg-white/95 backdrop-blur'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        <Link to="/" className="font-serif text-2xl font-bold text-dark tracking-wide">
-          Esenzzia
+    <header data-theme="noir" className="sticky top-0 z-50 border-b border-line">
+      <div className="page h-header flex items-center justify-between gap-ez-6">
+        <Link to="/" aria-label="Esenzzia, inicio" className="rounded-sm">
+          <Logo size={40} className="hidden sm:inline-flex" />
+          <Logo variant="isotipo" size={40} className="sm:hidden" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          <Link to="/shop" className="text-sm font-medium hover:text-gold transition-colors">Catalogo</Link>
-          <Link to="/shop?featured=true" className="text-sm font-medium hover:text-gold transition-colors">Destacados</Link>
-          <Link to="/shop?category=arabicos" className="text-sm font-medium hover:text-gold transition-colors">Arabicos</Link>
-          <Link to="/shop?category=nicho" className="text-sm font-medium hover:text-gold transition-colors">Nicho</Link>
+        <nav aria-label="Principal" className="hidden md:flex items-center gap-ez-6 font-sans text-nav">
+          {NAV.map(n => (
+            <Link
+              key={n.to} to={n.to}
+              aria-current={current === n.to ? 'page' : undefined}
+              className={`${navLink} ${current === n.to ? 'text-ink underline' : ''}`}
+            >
+              {n.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-ez-4 font-sans text-nav">
           {user ? (
-            <div className="flex items-center gap-3">
-              <Link to="/account" className="text-sm text-gray-600 hover:text-gold">{user.firstName}</Link>
-              <button onClick={() => { logout(); navigate('/'); }} className="text-xs text-gray-400 hover:text-red-500">Salir</button>
+            <div className="hidden sm:flex items-center gap-ez-4">
+              <Link to="/account" className={navLink}>{user.firstName}</Link>
+              <button onClick={() => { logout(); navigate('/'); }} className="text-body-sm text-ink-muted hover:text-ink">Salir</button>
             </div>
           ) : (
-            <Link to="/login" className="text-sm font-medium hover:text-gold transition-colors">Ingresar</Link>
+            <Link to="/login" className={`hidden sm:inline ${navLink}`}>Ingresar</Link>
           )}
-          <Link to="/cart" className="relative">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-gold text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {itemCount}
-              </span>
-            )}
-          </Link>
+          <Link to="/cart" className="btn-outline">Carrito ({itemCount})</Link>
+          <button
+            className="md:hidden btn-ghost"
+            aria-expanded={mobileOpen}
+            aria-controls="menu-movil"
+            onClick={() => setMobileOpen(o => !o)}
+          >
+            Menú
+          </button>
         </div>
       </div>
+
+      {mobileOpen && (
+        <nav id="menu-movil" aria-label="Principal" className="md:hidden border-t border-line page py-ez-4 flex flex-col gap-ez-4 font-sans text-nav">
+          {NAV.map(n => (
+            <Link key={n.to} to={n.to} onClick={() => setMobileOpen(false)} className="text-ink-soft hover:text-ink">{n.label}</Link>
+          ))}
+          {user ? (
+            <Link to="/account" onClick={() => setMobileOpen(false)} className="text-ink-soft hover:text-ink">Mi cuenta</Link>
+          ) : (
+            <Link to="/login" onClick={() => setMobileOpen(false)} className="text-ink-soft hover:text-ink">Ingresar</Link>
+          )}
+        </nav>
+      )}
     </header>
   );
 }

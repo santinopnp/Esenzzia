@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Isotipo } from './brand/Logo';
 
 interface Message { role: 'user' | 'assistant'; content: string; ts: number; }
 
@@ -14,7 +15,7 @@ export default function ChatWidget() {
   const [open, setOpen]     = useState(false);
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    content: 'Hola, soy Valentina, tu asesora de fragancias en Esenzzia. Como puedo ayudarte hoy?',
+    content: 'Hola, soy Valentina, tu asesora de fragancias en Esenzzia. ¿Cómo puedo ayudarte hoy?',
     ts: Date.now(),
   }]);
   const [input, setInput]   = useState('');
@@ -52,7 +53,7 @@ export default function ChatWidget() {
       const data = await r.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'Disculpa, intenta de nuevo.', ts: Date.now() }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Ups, hubo un error. Intenta de nuevo.', ts: Date.now() }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Hubo un error. Intenta de nuevo.', ts: Date.now() }]);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ export default function ChatWidget() {
       {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 bg-gold text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-gold-dark transition-colors"
+        className="fixed bottom-6 right-6 z-50 bg-action text-action-on w-14 h-14 rounded-full shadow-hairline flex items-center justify-center hover:bg-action-hover transition-colors"
         aria-label="Chat con Valentina"
       >
         {open ? (
@@ -80,24 +81,24 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden" style={{ maxHeight: '70vh' }}>
+        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-surface rounded-xl border border-line flex flex-col overflow-hidden" style={{ maxHeight: '70vh' }}>
           {/* Header */}
-          <div className="bg-dark px-4 py-3 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-white font-serif font-bold text-sm">V</div>
+          <div data-theme="noir" className="px-4 py-3 flex items-center gap-3 border-b border-line">
+            <Isotipo size={32} />
             <div>
-              <p className="text-white font-semibold text-sm">Valentina</p>
-              <p className="text-gray-400 text-xs">Asesora de fragancias IA</p>
+              <p className="perfume-name text-perfume-sm">Valentina</p>
+              <p className="legal">Asesora de fragancias</p>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-cream">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
                   m.role === 'user'
-                    ? 'bg-gold text-white rounded-br-none'
-                    : 'bg-white text-dark shadow-sm rounded-bl-none'
+                    ? 'bg-action text-action-on rounded-br-none'
+                    : 'bg-surface-alt text-ink border border-line rounded-bl-none'
                 }`}>
                   {m.content}
                 </div>
@@ -105,11 +106,11 @@ export default function ChatWidget() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white px-4 py-3 rounded-xl shadow-sm">
+                <div className="bg-surface-alt px-4 py-3 rounded-xl border border-line">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-gold rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-gold rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-gold rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="w-2 h-2 bg-accent-decor rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-accent-decor rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-accent-decor rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               </div>
@@ -118,20 +119,20 @@ export default function ChatWidget() {
           </div>
 
           {/* Input */}
-          <div className="border-t p-3 flex gap-2 bg-white">
+          <div className="border-t border-line p-3 flex gap-2 bg-surface">
             <input
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-              placeholder="Escribe aqui..."
-              className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-gold"
+              placeholder="Escribe aquí…"
+              className="flex-1 text-sm border border-line rounded-lg px-3 py-2 focus:border-accent"
               disabled={loading}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              className="bg-gold text-white rounded-lg px-3 py-2 disabled:opacity-50 hover:bg-gold-dark transition-colors"
+              className="bg-action text-action-on rounded-lg px-3 py-2 disabled:opacity-50 hover:bg-action-hover transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
