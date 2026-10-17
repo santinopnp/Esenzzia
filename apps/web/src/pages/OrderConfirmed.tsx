@@ -1,4 +1,5 @@
 import { useSearchParams, Link } from 'react-router-dom';
+import { Isotipo, Filete } from '../components/brand/Logo';
 
 export default function OrderConfirmed() {
   const [params] = useSearchParams();
@@ -6,12 +7,13 @@ export default function OrderConfirmed() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-20 text-center">
-      <div className="text-6xl mb-6">🎉</div>
-      <h1 className="font-serif text-3xl font-bold mb-4">Pedido confirmado</h1>
+      <div className="flex justify-center mb-6"><Isotipo size={72} /></div>
+      <h1 className="font-display text-4xl font-medium mb-4">Pedido confirmado</h1>
+      <div className="mb-6"><Filete>Esencias que perduran</Filete></div>
       {orderNumber && (
-        <p className="text-gray-500 mb-2">Numero de orden: <strong className="text-dark">{orderNumber}</strong></p>
+        <p className="text-ink-muted mb-2">Número de orden: <strong className="text-ink">{orderNumber}</strong></p>
       )}
-      <p className="text-gray-500 mb-8">Recibiras un correo con los detalles de tu pedido. Tu fragancia llegara en 2-5 dias habiles.</p>
+      <p className="text-ink-muted mb-8">Recibirás un correo con los detalles de tu pedido. Tu fragancia llegará en 2 a 5 días hábiles.</p>
       <Link to="/shop" className="btn-primary">Seguir comprando</Link>
     </div>
   );
